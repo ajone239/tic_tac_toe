@@ -25,6 +25,14 @@ func main() {
 		// set the move
 		board.board[i][j] = whos_move
 
+		// check for winning
+		winner := board.checkForWin()
+
+		if winner != blank {
+			fmt.Println(squareToWord(whos_move), "has won!")
+			fmt.Println(board)
+			return
+		}
 		// switch
 		switch whos_move {
 		case nought:
@@ -33,15 +41,6 @@ func main() {
 			whos_move = nought
 		default:
 			fmt.Println("unreachable")
-			return
-		}
-
-		// check for winning
-		winner := board.checkForWin()
-
-		if winner != blank {
-			fmt.Println(squareToWord(whos_move), "has won!")
-			fmt.Println(board)
 			return
 		}
 	}
