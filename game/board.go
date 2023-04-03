@@ -1,6 +1,9 @@
-package main
+package game
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+)
 
 const BOARD_SIZE = 3
 
@@ -14,6 +17,7 @@ const (
 
 type Board struct {
 	board [BOARD_SIZE][BOARD_SIZE]square
+  whos_move square
 }
 
 func squareToWord(s square) string {
@@ -27,32 +31,61 @@ func squareToWord(s square) string {
 	}
 }
 
-func newBoard() *Board {
+func (s square) IsBlank() bool {
+  return s == blank
+}
+
+/*
+ * Helpers
+ */
+
+func NewBoard() *Board {
 	board := Board{
 		board: [BOARD_SIZE][BOARD_SIZE]square{
 			{blank, blank, blank},
 			{blank, blank, blank},
 			{blank, blank, blank},
 		},
+    whos_move: cross,
 	}
 	return &board
 }
 
-func (board *Board) checkGoodMove(i, j int) bool {
+func (board *Board) SwitchPlayer() {
+    switch board.whos_move {
+		case nought:
+			board.whos_move = cross
+		case cross:
+			board.whos_move = nought
+		default:
+      panic("unreachable")
+		}
+}
+
+func (board *Board) WhosMove() string{
+  return squareToWord(board.whos_move)
+}
+
+func (board *Board) CheckGoodMove(i, j int) bool {
 	return !(i >= BOARD_SIZE || i < 0 ||
 		j >= BOARD_SIZE || j < 0 ||
 		board.board[i][j] != blank)
 }
 
-func (board *Board) checkForWin() square {
+func (board *Board) MakeMove(i, j int) {
+  		board.board[i][j] = board.whos_move
+}
+
+func (board *Board) CheckForWin() square {
 	row_winner := board.checkRows()
 	col_winner := board.checkColumns()
 	diag_winner := board.checkDiagonols()
 
 	winners := []square{row_winner, col_winner, diag_winner}
 
-	for _, w := range winners {
+	for i, w := range winners {
 		if w != blank {
+      fmt.Println("this won: ", i)
 			return w
 		}
 	}
@@ -86,11 +119,12 @@ func (board *Board) checkRows() square {
 func (board *Board) checkColumns() square {
 	for i := 0; i < BOARD_SIZE; i++ {
 		row := [3]square{
-			board.board[i][0],
-			board.board[i][1],
-			board.board[i][2],
+			board.board[0][i],
+			board.board[1][i],
+			board.board[2][i],
 		}
 		winner := checkSquaresForWin(row)
+    fmt.Println(row)
 		if winner != blank {
 			return winner
 		}
