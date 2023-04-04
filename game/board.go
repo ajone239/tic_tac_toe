@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-const BOARD_SIZE = 3
+const BOARD_SIDE_LENGTH = 3
 
 type square int
 
@@ -16,7 +16,7 @@ const (
 )
 
 type Board struct {
-	board [BOARD_SIZE][BOARD_SIZE]square
+	board [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square
   whos_move square
 }
 
@@ -41,7 +41,7 @@ func (s square) IsBlank() bool {
 
 func NewBoard() *Board {
 	board := Board{
-		board: [BOARD_SIZE][BOARD_SIZE]square{
+		board: [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square{
 			{blank, blank, blank},
 			{blank, blank, blank},
 			{blank, blank, blank},
@@ -67,8 +67,8 @@ func (board *Board) WhosMove() string{
 }
 
 func (board *Board) CheckGoodMove(i, j int) bool {
-	return !(i >= BOARD_SIZE || i < 0 ||
-		j >= BOARD_SIZE || j < 0 ||
+	return !(i >= BOARD_SIDE_LENGTH || i < 0 ||
+		j >= BOARD_SIDE_LENGTH || j < 0 ||
 		board.board[i][j] != blank)
 }
 
@@ -83,9 +83,8 @@ func (board *Board) CheckForWin() square {
 
 	winners := []square{row_winner, col_winner, diag_winner}
 
-	for i, w := range winners {
+	for _, w := range winners {
 		if w != blank {
-      fmt.Println("this won: ", i)
 			return w
 		}
 	}
@@ -96,8 +95,8 @@ func (board *Board) CheckForWin() square {
 func (board *Board) listMoves() [][2]int {
 	rv := make([][2]int, 0)
 
-	for i := 0; i < BOARD_SIZE; i++ {
-		for j := 0; j < BOARD_SIZE; j++ {
+	for i := 0; i < BOARD_SIDE_LENGTH; i++ {
+		for j := 0; j < BOARD_SIDE_LENGTH; j++ {
 			if board.board[i][j] == blank {
 				rv = append(rv, [2]int{i, j})
 			}
@@ -117,14 +116,13 @@ func (board *Board) checkRows() square {
 }
 
 func (board *Board) checkColumns() square {
-	for i := 0; i < BOARD_SIZE; i++ {
-		row := [3]square{
+	for i := 0; i < BOARD_SIDE_LENGTH; i++ {
+		column := [BOARD_SIDE_LENGTH]square{
 			board.board[0][i],
 			board.board[1][i],
 			board.board[2][i],
 		}
-		winner := checkSquaresForWin(row)
-    fmt.Println(row)
+		winner := checkSquaresForWin(column )
 		if winner != blank {
 			return winner
 		}
@@ -133,7 +131,7 @@ func (board *Board) checkColumns() square {
 }
 
 func (board *Board) checkDiagonols() square {
-	diag := [3]square{
+	diag := [BOARD_SIDE_LENGTH]square{
 		board.board[0][0],
 		board.board[1][1],
 		board.board[2][2],
@@ -143,7 +141,7 @@ func (board *Board) checkDiagonols() square {
 		return winner
 	}
 
-	diag = [3]square{
+	diag = [BOARD_SIDE_LENGTH]square{
 		board.board[2][0],
 		board.board[1][1],
 		board.board[0][2],
@@ -157,7 +155,7 @@ func (board *Board) checkDiagonols() square {
 	return blank
 }
 
-func checkSquaresForWin(s [3]square) square {
+func checkSquaresForWin(s [BOARD_SIDE_LENGTH]square) square {
 	if s[0] == blank {
 		return blank
 	}
@@ -176,9 +174,9 @@ func checkSquaresForWin(s [3]square) square {
 func (b Board) String() string {
 	ret_string := ""
 	ret_string += " 012 - i\n"
-	for i := 0; i < BOARD_SIZE; i++ {
+	for i := 0; i < BOARD_SIDE_LENGTH; i++ {
 		ret_string += strconv.Itoa(i)
-		for j := 0; j < BOARD_SIZE; j++ {
+		for j := 0; j < BOARD_SIDE_LENGTH; j++ {
 			switch b.board[j][i] {
 			case blank:
 				ret_string += "_"
