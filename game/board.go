@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"strconv"
 )
 
@@ -14,6 +13,20 @@ const (
 	nought = iota
 	cross  = iota
 )
+
+// Square to string
+func (s square) String() string {
+  switch s {
+  case blank:
+    return "_"
+  case nought:
+    return "O"
+  case cross:
+    return "X"
+  default:
+    panic("unreachable")
+  }
+}
 
 type Board struct {
 	board [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square
@@ -177,14 +190,7 @@ func (b Board) String() string {
 	for i := 0; i < BOARD_SIDE_LENGTH; i++ {
 		ret_string += strconv.Itoa(i)
 		for j := 0; j < BOARD_SIDE_LENGTH; j++ {
-			switch b.board[j][i] {
-			case blank:
-				ret_string += "_"
-			case nought:
-				ret_string += "O"
-			case cross:
-				ret_string += "X"
-			}
+      ret_string += b.board[j][i].String()
 		}
 		ret_string += "\n"
 	}
