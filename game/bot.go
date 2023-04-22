@@ -2,7 +2,6 @@ package game
 
 import (
 	"fmt"
-	"math/rand"
 )
 
 type boardString string
@@ -35,13 +34,42 @@ func NewBotPlayer(player int) *BotPlayer {
 }
 
 func (p BotPlayer) GetMove(board *Board) (int, int) {
-	// For now, just return a random move
-	moves := board.listMoves()
+  // Get the node for the board
+  node := p.game_tree.nodeMap[boardString(board.String())]
 
-	// Get random move
-	random_move := moves[rand.Intn(len(moves))]
-	i, j := random_move[0], random_move[1]
-	return i, j
+  fmt.Println()
+  fmt.Println("**********")
+  fmt.Println()
+
+  var best_eval int
+  if p.noc == cross {
+    best_eval = -1000000000
+  } else {
+    best_eval = 1000000000
+  }
+  var best_move playerMove = playerMove{-1, -1}
+  for move, child := range node.move_children_map {
+    fmt.Println("Move:", move, "Eval:", child.eval)
+    if (best_move == playerMove{-1, -1}) ||
+      (p.noc == cross && child.eval > best_eval) ||
+      (p.noc == nought && child.eval < best_eval) {
+        best_move = move
+        best_eval = child.eval
+    }
+  }
+
+  if !board.CheckGoodMove(best_move.i, best_move.j) {
+    panic("Bad move")
+  }
+
+  fmt.Println()
+  fmt.Println("Best Move:", best_move, "Eval:", best_eval)
+
+  fmt.Println()
+  fmt.Println("**********")
+  fmt.Println()
+
+  return best_move.i, best_move.j
 }
 
 /*
@@ -53,8 +81,24 @@ type gameTree struct {
 	root *treeNode
 	// A map of boards to nodes for quick lookup
 	nodeMap map[boardString]*treeNode
-	// Count the number of nodes with no moves
-	no_moves_count int
+}
+
+func newGameTree(board *Board) *gameTree {
+	root := &treeNode{
+    board: board,
+    move_children_map: make(map[playerMove]*treeNode),
+    eval: 0,
+  }
+
+	nodeMap := make(map[boardString]*treeNode)
+	nodeMap[boardString(board.String())] = root
+
+	g := gameTree{root: root, nodeMap: nodeMap}
+
+	g.expandTree(root, cross)
+  // g.PrintTree()
+
+	return &g
 }
 
 // BFS print the tree
@@ -63,57 +107,61 @@ func (g *gameTree) PrintTree() {
 	for len(queue) > 0 {
 		node := queue[0]
 
-		// Print the node
-		fmt.Printf("Board:\n" +
-			node.board.String() +
-			"Eval:" +
-			fmt.Sprintln(node.eval) +
-			"Move:" +
-			fmt.Sprint(node.i) +
-			"," +
-			fmt.Sprintln(node.j))
-		fmt.Println()
+    fmt.Println(node)
 
 		queue = queue[1:]
-		for _, child := range node.children {
+		for _, child := range node.move_children_map {
 			queue = append(queue, child)
 		}
 	}
-}
 
-func newGameTree(board *Board) *gameTree {
-	root := &treeNode{board: board, eval: 0, i: -1, j: -1}
+  // Count wins and draws and losses
+  wins := 0
+  draws := 0
+  losses := 0
 
-	nodeMap := make(map[boardString]*treeNode)
-	nodeMap[boardString(board.String())] = root
+  for _, node := range g.nodeMap {
+    if len(node.move_children_map) == 0 {
+      continue
+    }
+    if node.eval == 1 {
+      wins++
+    } else if node.eval == 0 {
+      draws++
+    } else if node.eval == -1 {
+      losses++
+    }
+  }
 
-	g := gameTree{root: root, nodeMap: nodeMap, no_moves_count: 0}
-
-	g.expandTree(root, cross)
-
-	return &g
+  fmt.Println("Tree size:", len(g.nodeMap))
+  fmt.Println("CrossWins:", wins)
+  fmt.Println("NoughtWins:", losses)
+  fmt.Println("Draws:", draws)
 }
 
 func (g *gameTree) expandTree(node *treeNode, square_to_play square) {
-
 	// Expand the node
 	g.expandNode(node, square_to_play)
 
+  if len(node.move_children_map) == 0 {
+    return
+  }
+
 	// Switch the square to play
-	square_to_play = square_to_play.Switch()
+  square_for_children_to_play := square_to_play.Switch()
 
 	// Expand the children who have not been expanded
-	for _, child := range node.children {
+	for _, child := range node.move_children_map {
 		if child.expanded {
 			continue
 		}
-		g.expandTree(child, square_to_play)
+		g.expandTree(child, square_for_children_to_play)
 		child.expanded = true
 	}
-}
 
-func (g *gameTree) evalTree(node *treeNode, square_to_play square) {
-
+  for _, child := range node.move_children_map {
+    node.eval += child.eval
+  }
 }
 
 /*
@@ -123,19 +171,25 @@ func (g *gameTree) evalTree(node *treeNode, square_to_play square) {
 type treeNode struct {
 	board       *Board
 	move_square square
-	i, j        int
 	eval        int
-	children    []*treeNode
+  move_children_map map[playerMove]*treeNode
 	expanded    bool
 }
 
-func contains(s [][2]int, e [2]int) bool {
-	for _, a := range s {
-		if a[0] == e[0] && a[1] == e[1] {
-			return true
-		}
-	}
-	return false
+type playerMove struct {
+  i, j int
+}
+
+// treeNode to string
+func (n *treeNode) String() string {
+  ret_string := ""
+  ret_string += "Board:\n"
+  ret_string += n.board.String()
+  ret_string += "Eval:"
+  ret_string += fmt.Sprintln(n.eval)
+  ret_string += "Move:"
+
+  return ret_string
 }
 
 func (g *gameTree) expandNode(node *treeNode, square_to_play square) {
@@ -149,13 +203,39 @@ func (g *gameTree) expandNode(node *treeNode, square_to_play square) {
 
 		// Get the board if it is in the map
 		if n, ok := g.nodeMap[boardString(new_board.String())]; ok {
-			node.children = append(node.children, n)
-		} else {
-			// Build the new node and add it to the tree
-			new_node := &treeNode{board: new_board, move_square: square_to_play, eval: 0, i: i, j: j, expanded: false}
-			node.children = append(node.children, new_node)
-			// Add the node to the map
-			g.nodeMap[boardString(new_board.String())] = new_node
-		}
-	}
+			node.move_children_map[playerMove{i, j}] = n
+      continue
+    }
+    eval, is_leaf := node.checkForWinOrDraw()
+
+    // Build the new node and add it to the tree
+    new_node := &treeNode{
+      board: new_board,
+      move_square: square_to_play,
+      move_children_map: make(map[playerMove]*treeNode),
+      eval: eval,
+      expanded: is_leaf,
+    }
+    node.move_children_map[playerMove{i, j}] = new_node
+    // Add the node to the map
+    g.nodeMap[boardString(new_board.String())] = new_node
+  }
+}
+
+// Check node for win or Draw
+func (n *treeNode) checkForWinOrDraw() (int, bool) {
+  // Check for win
+  if winner := n.board.CheckForWin(); winner != blank {
+    // Winning node
+    switch winner {
+    case cross:
+      return 1, true
+    case nought:
+      return -1, true
+    }
+  } else if n.board.IsFull() {
+    // Draw node
+    return 0, true
+  }
+  return 0, false
 }

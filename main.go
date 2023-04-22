@@ -15,8 +15,6 @@ func main() {
 	player1 := getPlayerType(*player1Type, 1)
 	player2 := getPlayerType(*player2Type, 2)
 
-	return
-
 	// Create new game
 	game := game.NewGame(player1, player2)
 
