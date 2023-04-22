@@ -12,8 +12,10 @@ func main() {
 
   flag.Parse()
 
-	player1 := getPlayerType(*player1Type)
-	player2 := getPlayerType(*player2Type)
+	player1 := getPlayerType(*player1Type, 1)
+	player2 := getPlayerType(*player2Type, 2)
+
+  return
 
   // Create new game
   game := game.NewGame(player1, player2)
@@ -24,14 +26,16 @@ func main() {
 
 
 // Get player type from string argument
-func getPlayerType(playerType string) game.Player {
+func getPlayerType(playerType string, playerNumber int) game.Player {
   switch playerType {
   case "random", "r":
     return game.RandomPlayer{}
   case "human", "h":
     return game.HumanPlayer{}
   case "bot", "b":
-    return game.BotPlayer{}
+    bot := game.NewBotPlayer(playerNumber)
+    bot.PrintTree()
+    return bot
   default:
     return game.RandomPlayer{}
   }

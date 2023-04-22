@@ -6,6 +6,10 @@ import (
 
 const BOARD_SIDE_LENGTH = 3
 
+/*
+ * Square
+ */
+
 type square int
 
 // Square values
@@ -17,20 +21,16 @@ const (
 
 // Square to string
 func (s square) String() string {
-  switch s {
-  case blank:
-    return "_"
-  case nought:
-    return "O"
-  case cross:
-    return "X"
-  default:
-    panic("unreachable")
-  }
-}
-
-type Board struct {
-	board [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square
+	switch s {
+	case blank:
+		return "_"
+	case nought:
+		return "O"
+	case cross:
+		return "X"
+	default:
+		panic("unreachable")
+	}
 }
 
 func squareToWord(s square) string {
@@ -45,12 +45,16 @@ func squareToWord(s square) string {
 }
 
 func (s square) IsBlank() bool {
-  return s == blank
+	return s == blank
 }
 
 /*
- * Helpers
+ * Board
  */
+
+type Board struct {
+	board [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square
+}
 
 func NewBoard() *Board {
 	board := Board{
@@ -64,14 +68,14 @@ func NewBoard() *Board {
 }
 
 func (board *Board) IsFull() bool {
-  for i := 0; i < BOARD_SIDE_LENGTH; i++ {
-    for j := 0; j < BOARD_SIDE_LENGTH; j++ {
-      if board.board[i][j] == blank {
-        return false
-      }
-    }
-  }
-  return true
+	for i := 0; i < BOARD_SIDE_LENGTH; i++ {
+		for j := 0; j < BOARD_SIDE_LENGTH; j++ {
+			if board.board[i][j] == blank {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func (board *Board) CheckGoodMove(i, j int) bool {
@@ -81,23 +85,23 @@ func (board *Board) CheckGoodMove(i, j int) bool {
 }
 
 func (board *Board) MakeMove(i, j int, s square) {
-  if s.IsBlank() {
-    panic("Cannot make a blank move")
-  }
-  board.board[i][j] = s
+	if s.IsBlank() {
+		panic("Cannot make a blank move")
+	}
+	board.board[i][j] = s
 }
 
 // Evaluate a board by checking for a win and mapping the value to a score
 func (board *Board) Evaluate() int {
-  winner := board.CheckForWin()
-  switch winner {
-  case nought:
-    return 1
-  case cross:
-    return -1
-  default:
-    return 0
-  }
+	winner := board.CheckForWin()
+	switch winner {
+	case nought:
+		return 1
+	case cross:
+		return -1
+	default:
+		return 0
+	}
 }
 
 func (board *Board) CheckForWin() square {
@@ -146,7 +150,7 @@ func (board *Board) checkColumns() square {
 			board.board[1][i],
 			board.board[2][i],
 		}
-		winner := checkSquaresForWin(column )
+		winner := checkSquaresForWin(column)
 		if winner != blank {
 			return winner
 		}
@@ -184,7 +188,7 @@ func checkSquaresForWin(s [BOARD_SIDE_LENGTH]square) square {
 		return blank
 	}
 	equal := true
-  for _, v := range s[1:] {
+	for _, v := range s[1:] {
 		equal = equal && (v == s[0])
 	}
 
@@ -201,7 +205,7 @@ func (b Board) String() string {
 	for i := 0; i < BOARD_SIDE_LENGTH; i++ {
 		ret_string += strconv.Itoa(i)
 		for j := 0; j < BOARD_SIDE_LENGTH; j++ {
-      ret_string += b.board[j][i].String()
+			ret_string += b.board[j][i].String()
 		}
 		ret_string += "\n"
 	}
