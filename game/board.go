@@ -112,7 +112,7 @@ func (board *Board) IsFull() bool {
 }
 
 func (board *Board) CheckGoodMove(i, j int) bool {
-	if !(i >= BOARD_SIDE_LENGTH || i < 0 ||
+	if (i >= BOARD_SIDE_LENGTH || i < 0 ||
 		j >= BOARD_SIDE_LENGTH || j < 0) {
       return false
   }
