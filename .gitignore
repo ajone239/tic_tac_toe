@@ -1,5 +1,6 @@
 # Binaries for programs and plugins
 main
+tic_tac_toe
 *.exe
 *.exe~
 *.dll

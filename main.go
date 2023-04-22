@@ -7,8 +7,8 @@ import (
 
 func main() {
 	// Get player types from command line arguments
-	player1Type := flag.String("p1", "random", "Player 1 type")
-	player2Type := flag.String("p2", "random", "Player 2 type")
+	player1Type := flag.String("p1", "human", "Player 1 type")
+	player2Type := flag.String("p2", "bot", "Player 2 type")
 
 	flag.Parse()
 
