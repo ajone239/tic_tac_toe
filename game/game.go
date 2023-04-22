@@ -62,14 +62,7 @@ func (g *Game) isPlayer1() bool {
 
 // Switch the player
 func (g *Game) SwitchPlayer() {
-	switch g.whosTurn {
-	case cross:
-		g.whosTurn = nought
-	case nought:
-		g.whosTurn = cross
-	default:
-		panic("Invalid player")
-	}
+	g.whosTurn = g.whosTurn.Switch()
 }
 
 // Print whose turn it is long

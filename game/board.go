@@ -48,6 +48,17 @@ func (s square) IsBlank() bool {
 	return s == blank
 }
 
+func (s square) Switch() square {
+	switch s {
+	case nought:
+		return cross
+	case cross:
+		return nought
+	default:
+		return blank
+	}
+}
+
 /*
  * Board
  */
@@ -65,6 +76,17 @@ func NewBoard() *Board {
 		},
 	}
 	return &board
+}
+
+// Copy a board
+func (board *Board) Copy() *Board {
+	new_board := NewBoard()
+	for i := 0; i < BOARD_SIDE_LENGTH; i++ {
+		for j := 0; j < BOARD_SIDE_LENGTH; j++ {
+			new_board.board[i][j] = board.board[i][j]
+		}
+	}
+	return new_board
 }
 
 func (board *Board) IsFull() bool {
