@@ -2,6 +2,16 @@ package game
 
 import "fmt"
 
+type GameResult int
+
+const (
+  Cross GameResult = iota
+  Draw GameResult = iota
+  Nought GameResult = iota
+)
+
+
+
 type Game struct {
 	crossPlayer  Player
 	nougthPlayer Player
@@ -18,7 +28,7 @@ func NewGame(crossPlayer, nougthPlayer Player) *Game {
 	}
 }
 
-func (g *Game) Loop() {
+func (g *Game) Loop() GameResult {
 	var i, j int
 	for {
 		// Display the board to the user
@@ -44,11 +54,11 @@ func (g *Game) Loop() {
 		if !winner.IsBlank() {
 			fmt.Println(g.whosTurnStr(), "has won!")
 			fmt.Println(g.board)
-			return
+			return winner.ToGameResult()
 		} else if g.board.IsFull() {
 			fmt.Println("Draw!")
 			fmt.Println(g.board)
-			return
+			return Draw
 		}
 		// switch
 		g.SwitchPlayer()

@@ -6,6 +6,11 @@ import (
 
 type boardString string
 
+const MaxUint = ^uint(0)
+const MinUint = 0
+const MaxInt = int(MaxUint >> 1)
+const MinInt = -MaxInt - 1
+
 /*
  * BotPlayer
  *  - Implements the Player interface
@@ -41,29 +46,14 @@ func (p BotPlayer) GetMove(board *Board) (int, int) {
   fmt.Println("**********")
   fmt.Println()
 
-  var best_eval int
-  if p.noc == cross {
-    best_eval = -1000000000
-  } else {
-    best_eval = 1000000000
-  }
-  var best_move playerMove = playerMove{-1, -1}
-  for move, child := range node.move_children_map {
-    fmt.Println("Move:", move, "Eval:", child.eval)
-    if (best_move == playerMove{-1, -1}) ||
-      (p.noc == cross && child.eval > best_eval) ||
-      (p.noc == nought && child.eval < best_eval) {
-        best_move = move
-        best_eval = child.eval
-    }
-  }
+  // best_move, best_eval := node.getBestEvalMove(p.noc == cross)
+  best_move, best_eval := node.getMinimaxMove(p.noc == cross)
+
+  fmt.Println("Best move:", best_move, "Eval:", best_eval)
 
   if !board.CheckGoodMove(best_move.i, best_move.j) {
     panic("Bad move")
   }
-
-  fmt.Println()
-  fmt.Println("Best Move:", best_move, "Eval:", best_eval)
 
   fmt.Println()
   fmt.Println("**********")
@@ -159,9 +149,9 @@ func (g *gameTree) expandTree(node *treeNode, square_to_play square) {
 		child.expanded = true
 	}
 
-  for _, child := range node.move_children_map {
-    node.eval += child.eval
-  }
+  // for _, child := range node.move_children_map {
+  //   node.eval += child.eval
+  // }
 }
 
 /*
@@ -238,4 +228,79 @@ func (n *treeNode) checkForWinOrDraw() (int, bool) {
     return 0, true
   }
   return 0, false
+}
+
+// Get the best move for the node
+func (n *treeNode) getBestEvalMove(max_or_min bool) (playerMove, int) {
+  var best_eval int
+  if max_or_min {
+    best_eval = MinInt
+  } else {
+    best_eval = MaxInt
+  }
+  var best_move playerMove = playerMove{-1, -1}
+  for move, child := range n.move_children_map {
+    fmt.Println("Move:", move, "Eval:", child.eval)
+    if (best_move == playerMove{-1, -1}) ||
+      (max_or_min && child.eval > best_eval) ||
+      (!max_or_min && child.eval < best_eval) {
+        best_move = move
+        best_eval = child.eval
+    }
+  }
+
+  return best_move, best_eval
+}
+
+// Minimax for node
+func (n *treeNode) getMinimaxMove(max_or_min bool) (playerMove, int) {
+  var best_eval int
+  if max_or_min {
+    best_eval = MinInt
+  } else {
+    best_eval = MaxInt
+  }
+  var best_move playerMove = playerMove{-1, -1}
+  for move, child := range n.move_children_map {
+    // MiniMax the tree
+    eval := child.minimax(!max_or_min)
+    fmt.Println("Move:", move, "Eval:", eval, "BestMove:", best_move, "BestEval:", best_eval)
+
+    // Update accordingly
+    if (best_move == playerMove{-1, -1}) ||
+       (max_or_min && eval > best_eval) ||
+       (!max_or_min && eval < best_eval) {
+      best_eval = eval
+      best_move = move
+     }
+  }
+  return best_move, best_eval
+}
+
+func (n *treeNode) minimax(max_or_min bool) int {
+  if len(n.move_children_map) == 0 {
+    return n.eval
+  }
+
+  child_evals := make([]int, 0)
+  for _, child := range n.move_children_map {
+    eval := child.minimax(!max_or_min)
+    child_evals = append(child_evals, eval)
+  }
+  best_eval := mom(child_evals, max_or_min)
+
+  return best_eval
+}
+
+func mom(a []int, max_or_min bool) int {
+  if len(a) == 0 {
+    return 0
+  }
+  best := a[0]
+  for _, v := range a {
+    if (max_or_min && v > best) || (!max_or_min && v < best) {
+      best = v
+    }
+  }
+  return best
 }
