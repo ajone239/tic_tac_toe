@@ -8,6 +8,7 @@ const BOARD_SIDE_LENGTH = 3
 
 type square int
 
+// Square values
 const (
 	blank  = iota
 	nought = iota
@@ -30,7 +31,6 @@ func (s square) String() string {
 
 type Board struct {
 	board [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square
-  whos_move square
 }
 
 func squareToWord(s square) string {
@@ -59,24 +59,19 @@ func NewBoard() *Board {
 			{blank, blank, blank},
 			{blank, blank, blank},
 		},
-    whos_move: cross,
 	}
 	return &board
 }
 
-func (board *Board) SwitchPlayer() {
-    switch board.whos_move {
-		case nought:
-			board.whos_move = cross
-		case cross:
-			board.whos_move = nought
-		default:
-      panic("unreachable")
-		}
-}
-
-func (board *Board) WhosMove() string{
-  return squareToWord(board.whos_move)
+func (board *Board) IsFull() bool {
+  for i := 0; i < BOARD_SIDE_LENGTH; i++ {
+    for j := 0; j < BOARD_SIDE_LENGTH; j++ {
+      if board.board[i][j] == blank {
+        return false
+      }
+    }
+  }
+  return true
 }
 
 func (board *Board) CheckGoodMove(i, j int) bool {
@@ -85,8 +80,24 @@ func (board *Board) CheckGoodMove(i, j int) bool {
 		board.board[i][j] != blank)
 }
 
-func (board *Board) MakeMove(i, j int) {
-  		board.board[i][j] = board.whos_move
+func (board *Board) MakeMove(i, j int, s square) {
+  if s.IsBlank() {
+    panic("Cannot make a blank move")
+  }
+  board.board[i][j] = s
+}
+
+// Evaluate a board by checking for a win and mapping the value to a score
+func (board *Board) Evaluate() int {
+  winner := board.CheckForWin()
+  switch winner {
+  case nought:
+    return 1
+  case cross:
+    return -1
+  default:
+    return 0
+  }
 }
 
 func (board *Board) CheckForWin() square {
@@ -173,7 +184,7 @@ func checkSquaresForWin(s [BOARD_SIDE_LENGTH]square) square {
 		return blank
 	}
 	equal := true
-	for _, v := range s {
+  for _, v := range s[1:] {
 		equal = equal && (v == s[0])
 	}
 

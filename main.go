@@ -2,41 +2,37 @@ package main
 
 import (
 	"example/game"
-	"fmt"
+  "flag"
 )
 
 func main() {
-	board := game.NewBoard()
+  // Get player types from command line arguments
+  player1Type := flag.String("p1", "random", "Player 1 type")
+  player2Type := flag.String("p2", "random", "Player 2 type")
 
-	var i, j int
-	for {
-		// Display the board to the user
-		fmt.Println(board)
-		fmt.Println(board.WhosMove(), "'s turn to go (i j):")
+  flag.Parse()
 
-		// Get input
-		for {
-			fmt.Scan(&i, &j)
-			if !board.CheckGoodMove(i, j) {
-        fmt.Println("Bad move -- Try again")
-				continue
-			}
-			break
-		}
+	player1 := getPlayerType(*player1Type)
+	player2 := getPlayerType(*player2Type)
 
-		// set the move
-		board.MakeMove(i,j)
+  // Create new game
+  game := game.NewGame(player1, player2)
 
-		// check for winning
-		winner := board.CheckForWin()
+  // Run the game
+  game.Loop()
+}
 
-		if !winner.IsBlank() {
-			fmt.Println(board.WhosMove(), "has won!")
-			fmt.Println(board)
-			return
-		}
-		// switch
-    board.SwitchPlayer()
-	}
 
+// Get player type from string argument
+func getPlayerType(playerType string) game.Player {
+  switch playerType {
+  case "random", "r":
+    return game.RandomPlayer{}
+  case "human", "h":
+    return game.HumanPlayer{}
+  case "bot", "b":
+    return game.BotPlayer{}
+  default:
+    return game.RandomPlayer{}
+  }
 }
