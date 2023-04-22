@@ -1,7 +1,3 @@
-module example/main
+module github.com/ajone239/tic_tac_toe
 
-go 1.19
-
-replace example/game => ./game
-
-require example/game v0.0.0-00010101000000-000000000000 // indirect
+go 1.20

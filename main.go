@@ -1,7 +1,7 @@
 package main
 
 import (
-	"example/game"
+  "github.com/ajone239/tic_tac_toe/game"
 	"flag"
 )
 
