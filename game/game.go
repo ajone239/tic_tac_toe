@@ -13,16 +13,16 @@ const (
 
 
 type Game struct {
-	crossPlayer  Player
-	nougthPlayer Player
+	crossPlayer  *Player
+	noughtPlayer *Player
 	board        *Board
 	whosTurn     square
 }
 
-func NewGame(crossPlayer, nougthPlayer Player) *Game {
+func NewGame(crossPlayer, noughtPlayer *Player) *Game {
 	return &Game{
 		crossPlayer:  crossPlayer,
-		nougthPlayer: nougthPlayer,
+		noughtPlayer: noughtPlayer,
 		board:        NewBoard(),
 		whosTurn:     cross,
 	}
@@ -36,14 +36,15 @@ func (g *Game) Loop() GameResult {
 		fmt.Println(g.whosTurnStr(), "'s turn to go (i j):")
 
 		// Get input
-		var player Player
+		var player *Player
 		if g.isPlayer1() {
 			player = g.crossPlayer
 		} else {
-			player = g.nougthPlayer
+			player = g.noughtPlayer
 		}
 
-		i, j = player.GetMove(g.board)
+    // TODO(austin): Does this have performance implications?
+		i, j = (*player).GetMove(g.board)
 
 		// set the move
 		g.board.MakeMove(i, j, g.whosTurn)

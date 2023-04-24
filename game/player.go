@@ -13,7 +13,7 @@ type HumanPlayer struct{}
 
 var _ Player = (*HumanPlayer)(nil)
 
-func (p HumanPlayer) GetMove(board *Board) (int, int) {
+func (p *HumanPlayer) GetMove(board *Board) (int, int) {
 	// Get move from user
 	var i, j int
 	for {
@@ -31,7 +31,7 @@ type RandomPlayer struct{}
 
 var _ Player = (*RandomPlayer)(nil)
 
-func (p RandomPlayer) GetMove(board *Board) (int, int) {
+func (p *RandomPlayer) GetMove(board *Board) (int, int) {
 	moves := board.listMoves()
 
 	move := moves[rand.Intn(len(moves))]

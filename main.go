@@ -16,7 +16,7 @@ func main() {
 	player2 := getPlayerType(*player2Type, 2)
 
 	// Create new game
-	game := game.NewGame(player1, player2)
+	game := game.NewGame(&player1, &player2)
 
 	// Run the game
 	game.Loop()
@@ -26,13 +26,13 @@ func main() {
 func getPlayerType(playerType string, playerNumber int) game.Player {
 	switch playerType {
 	case "random", "r":
-		return game.RandomPlayer{}
+		return new(game.RandomPlayer)
 	case "human", "h":
-		return game.HumanPlayer{}
+		return new(game.HumanPlayer)
 	case "bot", "b":
 		bot := game.NewBotPlayer(playerNumber)
 		return bot
 	default:
-		return game.RandomPlayer{}
+		return new(game.RandomPlayer)
 	}
 }

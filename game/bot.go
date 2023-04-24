@@ -38,7 +38,7 @@ func NewBotPlayer(player int) *BotPlayer {
 	return &BotPlayer{game_tree: tree, noc: noc}
 }
 
-func (p BotPlayer) GetMove(board *Board) (int, int) {
+func (p *BotPlayer) GetMove(board *Board) (int, int) {
   // Get the node for the board
   node := p.game_tree.nodeMap[boardString(board.String())]
 
