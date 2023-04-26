@@ -20,14 +20,14 @@ const (
 )
 
 func (s square) ToGameResult() GameResult {
-  switch s {
-  case nought:
-    return Nought
-  case cross:
-    return Cross
-  default:
-    return Draw
-  }
+	switch s {
+	case nought:
+		return Nought
+	case cross:
+		return Cross
+	default:
+		return Draw
+	}
 }
 
 // Square to string
@@ -112,12 +112,12 @@ func (board *Board) IsFull() bool {
 }
 
 func (board *Board) CheckGoodMove(i, j int) bool {
-	if (i >= BOARD_SIDE_LENGTH || i < 0 ||
-		j >= BOARD_SIDE_LENGTH || j < 0) {
-      return false
-  }
+	if i >= BOARD_SIDE_LENGTH || i < 0 ||
+		j >= BOARD_SIDE_LENGTH || j < 0 {
+		return false
+	}
 
-  return board.board[i][j] == blank
+	return board.board[i][j] == blank
 }
 
 func (board *Board) MakeMove(i, j int, s square) {

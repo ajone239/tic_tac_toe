@@ -5,12 +5,10 @@ import "fmt"
 type GameResult int
 
 const (
-  Cross GameResult = iota
-  Draw GameResult = iota
-  Nought GameResult = iota
+	Cross  GameResult = iota
+	Draw   GameResult = iota
+	Nought GameResult = iota
 )
-
-
 
 type Game struct {
 	crossPlayer  *Player
@@ -43,7 +41,7 @@ func (g *Game) Loop() GameResult {
 			player = g.noughtPlayer
 		}
 
-    // TODO(austin): Does this have performance implications?
+		// TODO(austin): Does this have performance implications?
 		i, j = (*player).GetMove(g.board)
 
 		// set the move

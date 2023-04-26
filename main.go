@@ -1,8 +1,8 @@
 package main
 
 import (
-  "github.com/ajone239/tic_tac_toe/game"
 	"flag"
+	"github.com/ajone239/tic_tac_toe/game"
 )
 
 func main() {
