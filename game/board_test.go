@@ -47,6 +47,7 @@ func TestCheckRows(t *testing.T) {
 		t.Error("blank board should not win")
 	}
 
+  // Check middle row
 	board.board = [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square{
 		{blank, blank, blank},
 		{cross, cross, cross},
@@ -64,6 +65,25 @@ func TestCheckRows(t *testing.T) {
 	if board.checkRows() != nought {
 		t.Error("nought should win")
 	}
+
+  // Check top row
+  board.board = [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square{
+    {cross, cross, cross},
+    {blank, blank, blank},
+    {blank, blank, blank},
+  }
+  if board.checkRows() != cross {
+    t.Error("cross should win")
+  }
+  // Check bottom row
+  board.board = [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square{
+    {blank, blank, blank},
+    {blank, blank, blank},
+    {nought, nought, nought},
+  }
+  if board.checkRows() != nought {
+    t.Error("nought should win")
+  }
 }
 
 func TestCheckColumns(t *testing.T) {
@@ -77,6 +97,7 @@ func TestCheckColumns(t *testing.T) {
 		t.Error("blank board should not win")
 	}
 
+  // Check middle column
 	board.board = [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square{
 		{blank, cross, blank},
 		{blank, cross, blank},
@@ -94,6 +115,25 @@ func TestCheckColumns(t *testing.T) {
 	if board.checkColumns() != nought {
 		t.Error("nought should win")
 	}
+
+  // Check left column
+  board.board = [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square{
+    {cross, blank, blank},
+    {cross, blank, blank},
+    {cross, blank, blank},
+  }
+  if board.checkColumns() != cross {
+    t.Error("cross should win")
+  }
+  // Check right column
+  board.board = [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square{
+    {blank, blank, nought},
+    {blank, blank, nought},
+    {blank, blank, nought},
+  }
+  if board.checkColumns() != nought {
+    t.Error("nought should win")
+  }
 }
 
 func TestCheckDiagonals(t *testing.T) {
@@ -158,13 +198,59 @@ func TestCheckForWin(t *testing.T) {
 
 func TestEvaluate(t *testing.T) {
 	board := NewBoard()
+  // Check nought
 	board.board = [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square{
 		{nought, nought, nought},
 		{blank, blank, blank},
 		{blank, blank, blank},
 	}
-
-	if board.Evaluate() != 1 {
-		t.Error("Expected 1, got ", board.Evaluate())
+	if board.Evaluate() != -1 {
+		t.Error("Expected -1, got ", board.Evaluate())
 	}
+
+  // Check cross
+  board.board = [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square{
+    {cross, cross, cross},
+    {blank, blank, blank},
+    {blank, blank, blank},
+  }
+  if board.Evaluate() != 1 {
+    t.Error("Expected 1, got ", board.Evaluate())
+  }
+
+  // Check draw
+  board.board = [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square{
+    {cross, nought, cross},
+    {cross, nought, nought},
+    {nought, cross, cross},
+  }
+  if board.Evaluate() != 0 {
+    t.Error("Expected 0, got ", board.Evaluate())
+  }
+
+  // Test this board
+  // XOX
+  // OOX
+  // OXX
+  board.board = [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square{
+    {cross, nought, cross},
+    {nought, cross, cross},
+    {nought, cross, cross},
+  }
+  if board.Evaluate() != 1 {
+    t.Error("Expected 1, got ", board.Evaluate())
+  }
+
+  // Flip the board over the diagonal
+  // XOO
+  // OOX
+  // XXX
+  board.board = [BOARD_SIDE_LENGTH][BOARD_SIDE_LENGTH]square{
+    {cross, nought, nought},
+    {nought, cross, cross},
+    {cross, cross, cross},
+  }
+  if board.Evaluate() != 1 {
+    t.Error("Expected 1, got ", board.Evaluate())
+  }
 }

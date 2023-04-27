@@ -6,6 +6,7 @@ import (
 
 type boardString string
 
+// Max val constants
 const MaxUint = ^uint(0)
 const MinUint = 0
 const MaxInt = int(MaxUint >> 1)
@@ -46,7 +47,7 @@ func (p *BotPlayer) GetMove(board *Board) (int, int) {
 	fmt.Println("**********")
 	fmt.Println()
 
-	// best_move, best_eval := node.getBestEvalMove(p.noc == cross)
+  // Maximize if cross, minimize if nought
 	best_move, best_eval := node.getMinimaxMove(p.noc == cross)
 
 	fmt.Println("Best move:", best_move, "Eval:", best_eval)
@@ -92,12 +93,13 @@ func newGameTree(board *Board) *gameTree {
 }
 
 // BFS print the tree
-func (g *gameTree) PrintTree() {
-	queue := []*treeNode{g.root}
+func (g *gameTree) PrintTree(root *treeNode) {
+	queue := []*treeNode{root}
 	for len(queue) > 0 {
 		node := queue[0]
 
 		fmt.Println(node)
+    fmt.Println()
 
 		queue = queue[1:]
 		for _, child := range node.move_children_map {
@@ -170,6 +172,10 @@ type playerMove struct {
 	i, j int
 }
 
+func nullMove() playerMove {
+  return playerMove{-1, -1}
+}
+
 // treeNode to string
 func (n *treeNode) String() string {
 	ret_string := ""
@@ -191,11 +197,12 @@ func (g *gameTree) expandNode(node *treeNode, square_to_play square) {
 		new_board := node.board.Copy()
 		new_board.MakeMove(i, j, square_to_play)
 
-		// Get the board if it is in the map
+    // Check if the board has already been added to the tree
 		if n, ok := g.nodeMap[boardString(new_board.String())]; ok {
 			node.move_children_map[playerMove{i, j}] = n
 			continue
 		}
+
 		eval, is_leaf := node.checkForWinOrDraw()
 
 		// Build the new node and add it to the tree
@@ -209,87 +216,92 @@ func (g *gameTree) expandNode(node *treeNode, square_to_play square) {
 		node.move_children_map[playerMove{i, j}] = new_node
 		// Add the node to the map
 		g.nodeMap[boardString(new_board.String())] = new_node
+
+    bad_board_string := "Board:\n 012 - i\n0XO\n1OO\n2OX\nj\n"
+    bad_board_string2 := "Board:\n 012 - i\n0XOX\n1OOX\n2OXX\nj\n"
+
+    if new_board.String() == bad_board_string || new_board.String() == bad_board_string2 {
+      // Print all information about the board
+      fmt.Println("Bad board")
+      fmt.Println("Move:", i, j)
+      fmt.Println("Square:", square_to_play)
+      fmt.Println("Eval:", eval)
+      fmt.Println("Is leaf:", is_leaf)
+      fmt.Println("Node:", new_node)
+      fmt.Println("Parent:", node)
+    }
 	}
 }
 
 // Check node for win or Draw
 func (n *treeNode) checkForWinOrDraw() (int, bool) {
-	// Check for win
-	if winner := n.board.CheckForWin(); winner != blank {
-		// Winning node
-		switch winner {
-		case cross:
-			return 1, true
-		case nought:
-			return -1, true
-		}
-	} else if n.board.IsFull() {
-		// Draw node
-		return 0, true
-	}
-	return 0, false
-}
-
-// Get the best move for the node
-func (n *treeNode) getBestEvalMove(max_or_min bool) (playerMove, int) {
-	var best_eval int
-	if max_or_min {
-		best_eval = MinInt
-	} else {
-		best_eval = MaxInt
-	}
-	var best_move playerMove = playerMove{-1, -1}
-	for move, child := range n.move_children_map {
-		fmt.Println("Move:", move, "Eval:", child.eval)
-		if (best_move == playerMove{-1, -1}) ||
-			(max_or_min && child.eval > best_eval) ||
-			(!max_or_min && child.eval < best_eval) {
-			best_move = move
-			best_eval = child.eval
-		}
-	}
-
-	return best_move, best_eval
+  // Check for win
+  eval := n.board.Evaluate()
+  draw := true
+  if eval == 0 {
+    draw = n.board.IsFull()
+  }
+  return eval, draw
 }
 
 // Minimax for node
 func (n *treeNode) getMinimaxMove(max_or_min bool) (playerMove, int) {
+  // init best_eval
 	var best_eval int
 	if max_or_min {
 		best_eval = MinInt
 	} else {
 		best_eval = MaxInt
 	}
-	var best_move playerMove = playerMove{-1, -1}
+
+  // No draws
+  best_draw_count := 0
+
+  // Sentinel null move
+	var best_move playerMove = nullMove()
+
 	for move, child := range n.move_children_map {
 		// MiniMax the tree
-		eval := child.minimax(!max_or_min)
-		fmt.Println("Move:", move, "Eval:", eval, "BestMove:", best_move, "BestEval:", best_eval)
+		eval, draw_count := child.minimax(!max_or_min)
 
 		// Update accordingly
-		if (best_move == playerMove{-1, -1}) ||
+		if (best_move == nullMove()) ||
 			(max_or_min && eval > best_eval) ||
-			(!max_or_min && eval < best_eval) {
+			(!max_or_min && eval < best_eval)  ||
+      (eval == best_eval && draw_count > best_draw_count) {
 			best_eval = eval
 			best_move = move
-		}
+      best_draw_count = draw_count
+      fmt.Println("Hit")
+    }
+
+    // Print best move and eval
+    fmt.Println("Best Move:", best_move, "Eval:", best_eval)
+    // Print the move and eval
+    fmt.Println(">>>  Move:", move, "Eval:", eval, "Draws:", draw_count)
 	}
+
+  fmt.Println()
+  fmt.Println("Best Move:", best_move, "Best Eval:", best_eval, "Draws:", best_draw_count)
+
 	return best_move, best_eval
 }
 
-func (n *treeNode) minimax(max_or_min bool) int {
+func (n *treeNode) minimax(max_or_min bool) (int, int) {
 	if len(n.move_children_map) == 0 {
-		return n.eval
+		return n.eval, 0
 	}
 
+  draw_count := 0
 	child_evals := make([]int, 0)
 	for _, child := range n.move_children_map {
-		eval := child.minimax(!max_or_min)
+		eval, _ := child.minimax(!max_or_min)
+    if eval == 0 { draw_count++ }
 		child_evals = append(child_evals, eval)
 	}
 	best_eval := mom(child_evals, max_or_min)
 
-	return best_eval
+	return best_eval, draw_count
 }
 
 func mom(a []int, max_or_min bool) int {

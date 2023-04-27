@@ -131,9 +131,9 @@ func (board *Board) MakeMove(i, j int, s square) {
 func (board *Board) Evaluate() int {
 	winner := board.CheckForWin()
 	switch winner {
-	case nought:
-		return 1
 	case cross:
+		return 1
+	case nought:
 		return -1
 	default:
 		return 0
