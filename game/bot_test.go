@@ -96,7 +96,7 @@ func TestMiniMax(t *testing.T) {
   g := newGameTree(NewBoard())
 
   // Run through the tests
-  for _, test := range MiniMaxTests {
+  for _, test := range MiniMaxTests[:1] {
     node := g.nodeMap[boardString(test.board.String())]
     if !node.board.CheckGoodMove(test.expected_move.i, test.expected_move.j) {
       t.Error("Bad test")

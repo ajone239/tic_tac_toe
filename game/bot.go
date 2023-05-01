@@ -113,7 +113,7 @@ func (g *gameTree) PrintTree(root *treeNode) {
 	losses := 0
 
 	for _, node := range g.nodeMap {
-		if len(node.move_children_map) == 0 {
+		if len(node.move_children_map) != 0 {
 			continue
 		}
 		if node.eval == 1 {
@@ -166,6 +166,7 @@ type treeNode struct {
 	eval              int
 	move_children_map map[playerMove]*treeNode
 	expanded          bool
+  is_leaf           bool
 }
 
 type playerMove struct {
@@ -205,6 +206,10 @@ func (g *gameTree) expandNode(node *treeNode, square_to_play square) {
 
 		eval, is_leaf := node.checkForWinOrDraw()
 
+    if eval != node.board.Evaluate() {
+      panic("Eval not equal")
+    }
+
 		// Build the new node and add it to the tree
 		new_node := &treeNode{
 			board:             new_board,
@@ -212,24 +217,11 @@ func (g *gameTree) expandNode(node *treeNode, square_to_play square) {
 			move_children_map: make(map[playerMove]*treeNode),
 			eval:              eval,
 			expanded:          is_leaf,
+      is_leaf:           is_leaf,
 		}
 		node.move_children_map[playerMove{i, j}] = new_node
 		// Add the node to the map
 		g.nodeMap[boardString(new_board.String())] = new_node
-
-    bad_board_string := "Board:\n 012 - i\n0XO\n1OO\n2OX\nj\n"
-    bad_board_string2 := "Board:\n 012 - i\n0XOX\n1OOX\n2OXX\nj\n"
-
-    if new_board.String() == bad_board_string || new_board.String() == bad_board_string2 {
-      // Print all information about the board
-      fmt.Println("Bad board")
-      fmt.Println("Move:", i, j)
-      fmt.Println("Square:", square_to_play)
-      fmt.Println("Eval:", eval)
-      fmt.Println("Is leaf:", is_leaf)
-      fmt.Println("Node:", new_node)
-      fmt.Println("Parent:", node)
-    }
 	}
 }
 
@@ -237,11 +229,10 @@ func (g *gameTree) expandNode(node *treeNode, square_to_play square) {
 func (n *treeNode) checkForWinOrDraw() (int, bool) {
   // Check for win
   eval := n.board.Evaluate()
-  draw := true
-  if eval == 0 {
-    draw = n.board.IsFull()
-  }
-  return eval, draw
+  // Is a leaf if there is a win or the board is full
+  is_leaf := eval != 0 || n.board.IsFull()
+
+  return eval, is_leaf
 }
 
 // Minimax for node
@@ -272,7 +263,6 @@ func (n *treeNode) getMinimaxMove(max_or_min bool) (playerMove, int) {
 			best_eval = eval
 			best_move = move
       best_draw_count = draw_count
-      fmt.Println("Hit")
     }
 
     // Print best move and eval
@@ -289,6 +279,12 @@ func (n *treeNode) getMinimaxMove(max_or_min bool) (playerMove, int) {
 
 func (n *treeNode) minimax(max_or_min bool) (int, int) {
 	if len(n.move_children_map) == 0 {
+    // TODO(austin): This is a hack -- fix it later
+    // Double check for win or draw
+    eval, _ := n.checkForWinOrDraw()
+    if eval != n.eval {
+      n.eval = eval
+    }
 		return n.eval, 0
 	}
 
