@@ -238,23 +238,14 @@ func checkForWinOrDraw(board *Board) (int, bool) {
 
 // Minimax for node
 func (n *treeNode) getMinimaxMove(max_or_min bool) (playerMove, int) {
-  // init best_eval
-	var best_eval int
-	if max_or_min {
-		best_eval = MinInt
-	} else {
-		best_eval = MaxInt
-	}
-
-  // No draws
-  best_draw_count := 0
-
   // Sentinel null move
 	var best_move playerMove = nullMove()
+  // Sentinel null move allows for us to not init best_eval
+  var best_eval int = 0
 
 	for move, child := range n.move_children_map {
 		// MiniMax the tree
-		eval, draw_count := child.minimax(!max_or_min)
+		eval:= child.minimax(!max_or_min)
 
 		// Update accordingly
 		if (best_move == nullMove()) ||
@@ -267,30 +258,28 @@ func (n *treeNode) getMinimaxMove(max_or_min bool) (playerMove, int) {
     // Print best move and eval
     fmt.Println("Best Move:", best_move, "Eval:", best_eval)
     // Print the move and eval
-    fmt.Println(">>>  Move:", move, "Eval:", eval, "Draws:", draw_count)
+    fmt.Println(">>>  Move:", move, "Eval:", eval)
 	}
 
   fmt.Println()
-  fmt.Println("Best Move:", best_move, "Best Eval:", best_eval, "Draws:", best_draw_count)
+  fmt.Println("Best Move:", best_move, "Best Eval:", best_eval)
 
 	return best_move, best_eval
 }
 
-func (n *treeNode) minimax(max_or_min bool) (int, int) {
+func (n *treeNode) minimax(max_or_min bool) int {
 	if n.is_leaf {
-		return n.eval, 0
+		return n.eval
 	}
 
-  draw_count := 0
 	child_evals := make([]int, 0)
 	for _, child := range n.move_children_map {
-		eval, _ := child.minimax(!max_or_min)
-    if eval == 0 { draw_count++ }
+		eval := child.minimax(!max_or_min)
 		child_evals = append(child_evals, eval)
 	}
 	best_eval := mom(child_evals, max_or_min)
 
-	return best_eval, draw_count
+	return best_eval
 }
 
 func mom(a []int, max_or_min bool) int {
