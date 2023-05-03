@@ -16,7 +16,7 @@ func TestCheckforWinOrDraw(t *testing.T) {
   node.board.MakeMove(0, 0, cross)
   node.board.MakeMove(0, 1, cross)
   node.board.MakeMove(0, 2, cross)
-  if eval, is_leaf := node.checkForWinOrDraw(); eval != 1 || !is_leaf {
+  if eval, is_leaf := checkForWinOrDraw(node.board); eval != 1 || !is_leaf {
     t.Log("Eval", eval,"IsLeaf", is_leaf)
     t.Error("Check for win failed 1")
   }
@@ -26,7 +26,7 @@ func TestCheckforWinOrDraw(t *testing.T) {
   node.board.MakeMove(0, 0, cross)
   node.board.MakeMove(0, 1, cross)
   node.board.MakeMove(0, 2, nought)
-  if eval, is_leaf := node.checkForWinOrDraw(); eval != 0 || is_leaf {
+  if eval, is_leaf := checkForWinOrDraw(node.board); eval != 0 || is_leaf {
 
     t.Error("Check for draw failed 2")
   }
@@ -88,6 +88,16 @@ var MiniMaxTests = []MiniMaxTest {
     },
     nought, playerMove{0, 1},
   },
+  {
+    &Board{
+      [3][3]square{
+        {cross, blank, blank},
+        {blank, nought, blank},
+        {cross, nought, cross},
+      },
+    },
+    nought, playerMove{0, 1},
+  },
 }
 
 func TestMiniMax(t *testing.T) {
@@ -96,7 +106,7 @@ func TestMiniMax(t *testing.T) {
   g := newGameTree(NewBoard())
 
   // Run through the tests
-  for _, test := range MiniMaxTests[:1] {
+  for _, test := range MiniMaxTests {
     node := g.nodeMap[boardString(test.board.String())]
     if !node.board.CheckGoodMove(test.expected_move.i, test.expected_move.j) {
       t.Error("Bad test")

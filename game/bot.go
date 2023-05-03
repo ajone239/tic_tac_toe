@@ -40,8 +40,13 @@ func NewBotPlayer(player int) *BotPlayer {
 }
 
 func (p *BotPlayer) GetMove(board *Board) (int, int) {
-	// Get the node for the board
-	node := p.game_tree.nodeMap[boardString(board.String())]
+  // Check if the board is in the tree and get the node
+  node, ok := p.game_tree.nodeMap[boardString(board.String())]
+  if !ok {
+    panic("Board not in tree")
+  }
+
+
 
 	fmt.Println()
 	fmt.Println("**********")
@@ -150,10 +155,6 @@ func (g *gameTree) expandTree(node *treeNode, square_to_play square) {
 		g.expandTree(child, square_for_children_to_play)
 		child.expanded = true
 	}
-
-	// for _, child := range node.move_children_map {
-	//   node.eval += child.eval
-	// }
 }
 
 /*
@@ -190,6 +191,8 @@ func (n *treeNode) String() string {
 }
 
 func (g *gameTree) expandNode(node *treeNode, square_to_play square) {
+
+  // Get all the moves
 	moves := node.board.listMoves()
 
 	for _, move := range moves {
@@ -198,17 +201,15 @@ func (g *gameTree) expandNode(node *treeNode, square_to_play square) {
 		new_board := node.board.Copy()
 		new_board.MakeMove(i, j, square_to_play)
 
+
+
     // Check if the board has already been added to the tree
 		if n, ok := g.nodeMap[boardString(new_board.String())]; ok {
 			node.move_children_map[playerMove{i, j}] = n
 			continue
 		}
 
-		eval, is_leaf := node.checkForWinOrDraw()
-
-    if eval != node.board.Evaluate() {
-      panic("Eval not equal")
-    }
+		eval, is_leaf := checkForWinOrDraw(new_board)
 
 		// Build the new node and add it to the tree
 		new_node := &treeNode{
@@ -226,11 +227,11 @@ func (g *gameTree) expandNode(node *treeNode, square_to_play square) {
 }
 
 // Check node for win or Draw
-func (n *treeNode) checkForWinOrDraw() (int, bool) {
+func checkForWinOrDraw(board *Board) (int, bool) {
   // Check for win
-  eval := n.board.Evaluate()
+  eval := board.Evaluate()
   // Is a leaf if there is a win or the board is full
-  is_leaf := eval != 0 || n.board.IsFull()
+  is_leaf := eval != 0 || board.IsFull()
 
   return eval, is_leaf
 }
@@ -258,11 +259,9 @@ func (n *treeNode) getMinimaxMove(max_or_min bool) (playerMove, int) {
 		// Update accordingly
 		if (best_move == nullMove()) ||
 			(max_or_min && eval > best_eval) ||
-			(!max_or_min && eval < best_eval)  ||
-      (eval == best_eval && draw_count > best_draw_count) {
+			(!max_or_min && eval < best_eval) {
 			best_eval = eval
 			best_move = move
-      best_draw_count = draw_count
     }
 
     // Print best move and eval
@@ -278,13 +277,7 @@ func (n *treeNode) getMinimaxMove(max_or_min bool) (playerMove, int) {
 }
 
 func (n *treeNode) minimax(max_or_min bool) (int, int) {
-	if len(n.move_children_map) == 0 {
-    // TODO(austin): This is a hack -- fix it later
-    // Double check for win or draw
-    eval, _ := n.checkForWinOrDraw()
-    if eval != n.eval {
-      n.eval = eval
-    }
+	if n.is_leaf {
 		return n.eval, 0
 	}
 

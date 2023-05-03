@@ -237,15 +237,15 @@ func checkSquaresForWin(s [BOARD_SIDE_LENGTH]square) square {
 
 func (b Board) String() string {
 	ret_string := ""
-	ret_string += " 012 - i\n"
+	ret_string += " 012 - j\n"
 	for i := 0; i < BOARD_SIDE_LENGTH; i++ {
 		ret_string += strconv.Itoa(i)
 		for j := 0; j < BOARD_SIDE_LENGTH; j++ {
-			ret_string += b.board[j][i].String()
+			ret_string += b.board[i][j].String()
 		}
 		ret_string += "\n"
 	}
-	ret_string += "j\n"
+	ret_string += "i\n"
 
 	return ret_string
 }
