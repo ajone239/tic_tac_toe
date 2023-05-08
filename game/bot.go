@@ -24,9 +24,14 @@ var _ Player = (*BotPlayer)(nil)
 type BotPlayer struct {
 	game_tree *gameTree
 	noc       square
+  debug     bool
 }
 
-func NewBotPlayer(player int) *BotPlayer {
+func (p *BotPlayer) IsHuman() bool {
+  return false
+}
+
+func NewBotPlayer(player int, debug bool) *BotPlayer {
 	var noc square
 	if player == 1 {
 		noc = cross
@@ -34,9 +39,9 @@ func NewBotPlayer(player int) *BotPlayer {
 		noc = nought
 	}
 	board := NewBoard()
-	tree := newGameTree(board)
+	tree := newGameTree(board, debug)
 
-	return &BotPlayer{game_tree: tree, noc: noc}
+	return &BotPlayer{game_tree: tree, noc: noc, debug: debug}
 }
 
 func (p *BotPlayer) GetMove(board *Board) (int, int) {
@@ -46,24 +51,28 @@ func (p *BotPlayer) GetMove(board *Board) (int, int) {
     panic("Board not in tree")
   }
 
-
-
-	fmt.Println()
-	fmt.Println("**********")
-	fmt.Println()
+  if p.debug {
+    fmt.Println()
+    fmt.Println("**********")
+    fmt.Println()
+  }
 
   // Maximize if cross, minimize if nought
-	best_move, best_eval := node.getMinimaxMove(p.noc == cross)
+	best_move, best_eval := node.getMinimaxMove(p.noc == cross, p.debug)
 
-	fmt.Println("Best move:", best_move, "Eval:", best_eval)
+  if p.debug {
+    fmt.Println("Best move:", best_move, "Eval:", best_eval)
+  }
 
 	if !board.CheckGoodMove(best_move.i, best_move.j) {
 		panic("Bad move")
 	}
 
-	fmt.Println()
-	fmt.Println("**********")
-	fmt.Println()
+  if p.debug {
+    fmt.Println()
+    fmt.Println("**********")
+    fmt.Println()
+  }
 
 	return best_move.i, best_move.j
 }
@@ -77,9 +86,10 @@ type gameTree struct {
 	root *treeNode
 	// A map of boards to nodes for quick lookup
 	nodeMap map[boardString]*treeNode
+  debug   bool
 }
 
-func newGameTree(board *Board) *gameTree {
+func newGameTree(board *Board, debug bool) *gameTree {
 	root := &treeNode{
 		board:             board,
 		move_children_map: make(map[playerMove]*treeNode),
@@ -89,10 +99,13 @@ func newGameTree(board *Board) *gameTree {
 	nodeMap := make(map[boardString]*treeNode)
 	nodeMap[boardString(board.String())] = root
 
-	g := gameTree{root: root, nodeMap: nodeMap}
+	g := gameTree{root: root, nodeMap: nodeMap, debug: debug}
 
 	g.expandTree(root, cross)
-	// g.PrintTree()
+
+  if debug {
+     g.PrintTree(root)
+  }
 
 	return &g
 }
@@ -201,8 +214,6 @@ func (g *gameTree) expandNode(node *treeNode, square_to_play square) {
 		new_board := node.board.Copy()
 		new_board.MakeMove(i, j, square_to_play)
 
-
-
     // Check if the board has already been added to the tree
 		if n, ok := g.nodeMap[boardString(new_board.String())]; ok {
 			node.move_children_map[playerMove{i, j}] = n
@@ -237,7 +248,7 @@ func checkForWinOrDraw(board *Board) (int, bool) {
 }
 
 // Minimax for node
-func (n *treeNode) getMinimaxMove(max_or_min bool) (playerMove, int) {
+func (n *treeNode) getMinimaxMove(max_or_min bool, debug bool) (playerMove, int) {
   // Sentinel null move
 	var best_move playerMove = nullMove()
   // Sentinel null move allows for us to not init best_eval
@@ -254,15 +265,16 @@ func (n *treeNode) getMinimaxMove(max_or_min bool) (playerMove, int) {
 			best_eval = eval
 			best_move = move
     }
-
-    // Print best move and eval
-    fmt.Println("Best Move:", best_move, "Eval:", best_eval)
     // Print the move and eval
-    fmt.Println(">>>  Move:", move, "Eval:", eval)
+    if debug {
+      fmt.Println(">>>  Move:", move, "Eval:", eval)
+    }
 	}
 
-  fmt.Println()
-  fmt.Println("Best Move:", best_move, "Best Eval:", best_eval)
+  if debug {
+    fmt.Println()
+    fmt.Println("Best Move:", best_move, "Best Eval:", best_eval)
+  }
 
 	return best_move, best_eval
 }

@@ -29,10 +29,6 @@ func NewGame(crossPlayer, noughtPlayer *Player) *Game {
 func (g *Game) Loop() GameResult {
 	var i, j int
 	for {
-		// Display the board to the user
-		fmt.Println(g.board)
-		fmt.Println(g.whosTurnStr(), "'s turn to go (i j):")
-
 		// Get input
 		var player *Player
 		if g.isPlayer1() {
@@ -41,11 +37,23 @@ func (g *Game) Loop() GameResult {
 			player = g.noughtPlayer
 		}
 
+    if (*player).IsHuman() {
+      // Display the board to the user
+      fmt.Println(g.board)
+      fmt.Println(g.whosTurnStr(), "'s turn to go (i j):")
+    }
+
+
 		// TODO(austin): Does this have performance implications?
 		i, j = (*player).GetMove(g.board)
 
 		// set the move
 		g.board.MakeMove(i, j, g.whosTurn)
+
+    // Print a non-human's move
+    if !(*player).IsHuman() {
+      fmt.Println(g.whosTurnStr(), "moved to", i, j)
+    }
 
 		// check for winning
 		winner := g.board.CheckForWin()

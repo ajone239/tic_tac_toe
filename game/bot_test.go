@@ -103,7 +103,7 @@ var MiniMaxTests = []MiniMaxTest {
 func TestMiniMax(t *testing.T) {
   fmt.Println("********************************************")
   // Create a game tree
-  g := newGameTree(NewBoard())
+  g := newGameTree(NewBoard(), false)
 
   // Run through the tests
   for _, test := range MiniMaxTests {
@@ -111,7 +111,7 @@ func TestMiniMax(t *testing.T) {
     if !node.board.CheckGoodMove(test.expected_move.i, test.expected_move.j) {
       t.Error("Bad test")
     }
-    if move, _ := node.getMinimaxMove(test.player == cross); move != test.expected_move {
+    if move, _ := node.getMinimaxMove(test.player == cross, false); move != test.expected_move {
       fmt.Println("********************************************")
       g.PrintTree(node)
       fmt.Println("********************************************")
