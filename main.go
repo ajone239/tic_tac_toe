@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+  "fmt"
   "sync"
 	tic_tac_toe "github.com/ajone239/tic_tac_toe/game"
 )
@@ -65,6 +66,7 @@ func botVsBotTest(games int) {
       panic("Bot vs Bot game did not draw")
     }
   }
+  fmt.Println("All bot vs bot games drew")
 }
 
 // Get player getter from game type
