@@ -31,11 +31,8 @@ func (g *Game) Loop() GameResult {
 	for {
 		// Get input
 		var player *Player
-		if g.isPlayer1() {
-			player = g.crossPlayer
-		} else {
-			player = g.noughtPlayer
-		}
+
+    player = g.getCurrentPlayer()
 
     if (*player).IsHuman() {
       // Display the board to the user
@@ -75,6 +72,14 @@ func (g *Game) Loop() GameResult {
 // Is it player 1's turn?
 func (g *Game) isPlayer1() bool {
 	return g.whosTurn == cross
+}
+
+func (g *Game) getCurrentPlayer() *Player {
+  if g.isPlayer1() {
+    return g.crossPlayer
+  } else {
+    return g.noughtPlayer
+  }
 }
 
 // Switch the player
