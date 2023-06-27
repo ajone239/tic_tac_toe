@@ -46,6 +46,12 @@ func NewBotPlayer(player int, debug bool) *BotPlayer {
 	return &BotPlayer{game_tree: tree, noc: noc, debug: debug}
 }
 
+/*
+ * GetMove
+ *  - Implements the Player interface
+ *  - Uses a game tree to determine the best move
+ *  - Uses a minimax algorithm to determine the best move
+ */
 func (p *BotPlayer) GetMove(board *game.Board) (int, int) {
   // Check if the board is in the tree and get the node
   node, ok := p.game_tree.nodeMap[boardString(board.String())]
