@@ -41,7 +41,7 @@ func (p *RandomPlayer) IsHuman() bool {
 }
 
 func (p *RandomPlayer) GetMove(board *Board) (int, int) {
-	moves := board.listMoves()
+	moves := board.ListMoves()
 
 	move := moves[rand.Intn(len(moves))]
 	return move[0], move[1]

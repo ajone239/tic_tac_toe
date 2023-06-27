@@ -5,16 +5,16 @@ import "fmt"
 type GameResult int
 
 const (
-	Cross  GameResult = iota
-	Draw   GameResult = iota
-	Nought GameResult = iota
+	CrossWin  GameResult = iota
+	Draw      GameResult = iota
+	NoughtWin GameResult = iota
 )
 
 type Game struct {
 	crossPlayer  *Player
 	noughtPlayer *Player
 	board        *Board
-	whosTurn     square
+	whosTurn     Square
 }
 
 func NewGame(crossPlayer, noughtPlayer *Player) *Game {
@@ -22,7 +22,7 @@ func NewGame(crossPlayer, noughtPlayer *Player) *Game {
 		crossPlayer:  crossPlayer,
 		noughtPlayer: noughtPlayer,
 		board:        NewBoard(),
-		whosTurn:     cross,
+		whosTurn:     Cross,
 	}
 }
 
@@ -71,7 +71,7 @@ func (g *Game) Loop() GameResult {
 
 // Is it player 1's turn?
 func (g *Game) isPlayer1() bool {
-	return g.whosTurn == cross
+	return g.whosTurn == Cross
 }
 
 func (g *Game) getCurrentPlayer() *Player {
@@ -90,9 +90,9 @@ func (g *Game) SwitchPlayer() {
 // Print whose turn it is long
 func (g *Game) whosTurnStr() string {
 	switch g.whosTurn {
-	case cross:
+	case Cross:
 		return "Cross"
-	case nought:
+	case Nought:
 		return "Nought"
 	default:
 		panic("Invalid player")

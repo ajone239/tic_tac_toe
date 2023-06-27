@@ -8,7 +8,9 @@ import (
 	"flag"
   "fmt"
   "sync"
+
 	tic_tac_toe "github.com/ajone239/tic_tac_toe/game"
+  tic_tac_toe_bot "github.com/ajone239/tic_tac_toe/game/bot"
 )
 
 func main() {
@@ -91,7 +93,7 @@ func getPlayerTypeTicTacToe(playerType string, playerNumber int, debug bool) tic
 	case "human", "h":
 		return new(tic_tac_toe.HumanPlayer)
 	case "bot", "b":
-		bot := tic_tac_toe.NewBotPlayer(playerNumber, debug)
+		bot := tic_tac_toe_bot.NewBotPlayer(playerNumber, debug)
 		return bot
 	default:
 		return new(tic_tac_toe.RandomPlayer)
